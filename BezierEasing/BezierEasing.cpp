@@ -11,8 +11,10 @@
 
 BezierEasing::BezierEasing(fPoint p1, fPoint p2) : p1(p1), p2(p2)
 {
+	valid = CheckPoints(p1, p2);
+
 	//Precompute the Samples for this Bezier curve if no linear
-	if (p1.x != p1.y && p2.x != p2.y)
+	if (valid && p1.x != p1.y && p2.x != p2.y)
 	{
 		for (int i = 0; i < SAMPLES_SIZE; ++i)
 		{
@@ -27,29 +29,33 @@ BezierEasing::~BezierEasing()
 
 float BezierEasing::GetEasingProgress(float t)
 {
+	if (valid)
+	{
+		if (p1.x == p1.y && p2.x == p2.y) //linear progression
+		{
+			last_value = (t <= 1) ? t : 1.0f;
+		}
+		else if (t == 0)
+		{
+			last_value = 0.0f;
+		}
+		else if (t >= 1)
+		{
+			last_value = 1.0f;
+		}
+		else
+		{
+			float curr_value = CalcBezier(GetXForTime(t), p1.y, p2.y);
 
-	if (p1.x == p1.y && p2.x == p2.y) //linear progression
-	{
-		last_value = t;
-	}
-	else if (t == 0)
-	{
-		last_value = 0.0f;
-	}
-	else if (t >= 1)
-	{
-		last_value = 1.0f;
+			curr_value = (curr_value <= 1) ? curr_value : last_value;
+
+			last_value = (curr_value > last_value) ? curr_value : last_value;
+		}
+
+		return last_value;
 	}
 	else
-	{
-		float curr_value = CalcBezier(GetXForTime(t), p1.y, p2.y);
-
-		curr_value = (curr_value <= 1) ? curr_value : last_value;
-
-		last_value = (curr_value > last_value) ? curr_value : last_value;
-	}
-
-	return last_value;
+		return -1;
 }
 
 float BezierEasing::VecACoord(float p1_coord, float p2_coord)
@@ -146,4 +152,12 @@ float BezierEasing::GetXForTime(float time)
 	{
 		return BinarySubdivide(time, interval_start, interval_start + SAMPLES_STEP, p1.x, p2.x);
 	}
+}
+
+bool BezierEasing::CheckPoints(fPoint p1, fPoint p2)
+{
+	return ((p1.x >= 0 && p1.x <= 1) 
+		&& (p1.y >= 0 && p1.y <= 1) 
+		&& (p2.x >= 0 && p2.x <= 1) 
+		&& (p2.y >= 0 && p2.y <= 1));
 }
