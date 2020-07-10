@@ -80,7 +80,7 @@ float BezierEasing::CalcBezier(float time, float p1_coord, float p2_coord)
 
 float BezierEasing::GetSlope(float time, float p1_coord, float p2_coord)
 {
-	return 3.0f*VecACoord(p1_coord, p2_coord)*time*time + 2.0f*VecBCoord(p1_coord, p2_coord)*time + VecCCoord(p1_coord)*time;
+	return 3.0f*VecACoord(p1_coord, p2_coord)*time*time + 2.0f*VecBCoord(p1_coord, p2_coord)*time + VecCCoord(p1_coord);
 }
 
 float BezierEasing::BinarySubdivide(float time, float interval_start, float next_interval_step, float p1_coord, float p2_coord)
